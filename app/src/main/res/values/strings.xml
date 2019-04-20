@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">eco_rest_retro_mysql</string>
+    <string name="title_activity_driver_maps">Map</string>
+    <string name="location_permission_denied">0</string>
+    <string name="permission_required_toast">1</string>
+    <string name="permission_rationale_location" />
+    <string name="title_activity_passenger_maps">Map</string>
+</resources>
