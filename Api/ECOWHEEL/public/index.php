@@ -175,7 +175,7 @@ $app->put('/drivercurrentposition' , function(Request $request , Response $respo
 });
 
 //returns one driver's last location 
-$app->get('/getdriverlocation', function(Request $request, Response $response)
+$app->post('/getdriverlocation', function(Request $request, Response $response)
 {
     if(!haveEmptyParameters(array('username'), $request, $response))
     {
@@ -186,14 +186,28 @@ $app->get('/getdriverlocation', function(Request $request, Response $response)
     $db = new DbOperations;
     $location = $db->getDriverLocationByUsername($username);
 
-    $response_data = array();
-    $response_data['error'] = false;
-    $response_data['location'] = $location;
-    $response->write(json_encode($response_data));
+    if ($location != USER_NOT_FOUND) {
+        $response_data = array();
+        $response_data['error'] = false;
+        $response_data['location'] = $location;
+        $response->write(json_encode($response_data));
 
-    return $response
-                ->withHeader('Content-type', 'application/json')
-                ->withStatus(200);
+        return $response
+                    ->withHeader('Content-type', 'application/json')
+                    ->withStatus(200);
+        
+    }
+    else {
+        $response_data = array();
+        $response_data['error'] = true;
+        $response_data['location'] = 'No location found';
+        $response->write(json_encode($response_data));
+
+        return $response
+                    ->withHeader('Content-type', 'application/json')
+                    ->withStatus(200);
+    }
+    
 
     }
 });

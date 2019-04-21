@@ -87,16 +87,26 @@
         
         //geting driver password and compare
         public function getDriverLocationByUsername($username){
+           if ($this->isDriverExist($username)) 
+           {
             $stmt = $this->con->prepare("SELECT driver_c_lat, driver_c_lng FROM driver WHERE username = ?");
             $stmt->bind_param("s", $username);
             $stmt->execute();
             $stmt->bind_result($lat, $lng);
             $stmt->fetch();
-            $driver_location = array();
-            $driver_location['driver_c_lat'] = $lat;
-            $driver_location['driver_c_lng'] = $lng;
-            return $driver_location;
+
+            $user_details = array();
+            $user_details['driver_lat'] = $lat;
+            $user_details['driver_lng'] = $lng;
+            return $user_details;
+           }
+           else {
+               return USER_NOT_FOUND;
+           }
+            
         } 
+
+
 
         //geting driver password and compare
         private function getCurrentDriverPasswordByUsername($username){
