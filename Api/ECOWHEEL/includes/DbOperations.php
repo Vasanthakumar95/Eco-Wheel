@@ -106,7 +106,20 @@
             
         } 
 
+        public function getAllOnlineDriverUsername()
+        {
 
+            $stmt = $this->con->prepare("SELECT username FROM driver WHERE online_status = 'online'");
+            $stmt->execute();
+            $stmt->bind_result($username);
+            $driver = array();
+            while($stmt->fetch())
+            {
+                array_push($driver , $username);
+            }
+            return $driver;
+
+        }
 
         //geting driver password and compare
         private function getCurrentDriverPasswordByUsername($username){
@@ -164,6 +177,10 @@
             {
                 if(password_verify($password,$hashed_password))
                 {
+                    //updates online_status when logging in
+                    $stmt = $this->con->prepare("UPDATE passenger SET online_status = 'online' WHERE username = ?");
+                    $stmt->bind_param("s",$username);
+                    $stmt->execute();
                     return USER_AUTHENTICATED;
                 }else {
                     return USER_PASSWORD_DO_NOT_MATCH;
@@ -219,6 +236,16 @@
             $stmt->execute();
             $stmt->store_result();
             return $stmt->num_rows > 0;
+        }
+
+        public function passengerLogout($username)
+        {
+            $stmt = $this->con->prepare("UPDATE passenger SET online_status = 'offline' WHERE username = ?");
+                    $stmt->bind_param("s",$username);
+                    if($stmt->execute())
+                        return true;
+                    return false; 
+                    
         }
 //-----------------------------------------------------PASSENGER---------------------------------------------------------------------------------------------  
         
