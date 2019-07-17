@@ -18,19 +18,19 @@ import retrofit2.Response;
 
 public class PassengerRegisterActivity extends AppCompatActivity implements View.OnClickListener{
 
-    private EditText editTextUsername, editTextPassword, editTextName, editTextIc, editTextEmail;
+    private EditText editTextUsername, editTextPassword, editTextName, editTextIc, editTextEmail, editTextContact;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_driver_register);
+        setContentView(R.layout.activity_passenger_register);
 
         editTextUsername = findViewById(R.id.editTextUsername);
         editTextPassword = findViewById(R.id.editTextPassword);
         editTextName = findViewById(R.id.editTextName);
         editTextIc = findViewById(R.id.editTextIc);
         editTextEmail = findViewById(R.id.editTextEmail);
-
+        editTextContact = findViewById(R.id.editTextContact);
         findViewById(R.id.textViewLogin).setOnClickListener(this);
         findViewById(R.id.buttonRegister).setOnClickListener(this);
 
@@ -45,7 +45,7 @@ public class PassengerRegisterActivity extends AppCompatActivity implements View
         String name = editTextName.getText().toString().trim();
         String ic = editTextIc.getText().toString().trim();
         String email = editTextEmail.getText().toString().trim();
-
+        String contact = editTextContact.getText().toString().trim();
         //error checking from client side input
         if(username.isEmpty())
         {
@@ -82,9 +82,16 @@ public class PassengerRegisterActivity extends AppCompatActivity implements View
             return;
         }
 
+        if(contact.isEmpty())
+        {
+            editTextPassword.setError("Contact No. is required");
+            editTextPassword.requestFocus();
+            return;
+        }
+
         Call<DefaultResponse> call = RetrofitClient.getmInstance()
                 .getApi()
-                .createPassenger(id,username,password,name,ic,email);
+                .createPassenger(id,username,password,name,ic,email, contact);
 
         call.enqueue(new Callback<DefaultResponse>() {
             @Override

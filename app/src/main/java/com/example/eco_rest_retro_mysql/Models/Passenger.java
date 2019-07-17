@@ -2,16 +2,16 @@ package com.example.eco_rest_retro_mysql.Models;
 
 public class Passenger {
 
-    private int id;
+    private int passenger_id;
     private String username;
 
     public Passenger(int id, String username) {
-        this.id = id;
+        this.passenger_id = id;
         this.username = username;
     }
 
-    public int getId() {
-        return id;
+    public int getPassenger_id() {
+        return passenger_id;
     }
 
     public String getUsername() {

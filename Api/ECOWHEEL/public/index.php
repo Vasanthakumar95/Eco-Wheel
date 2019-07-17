@@ -17,7 +17,7 @@ $app = new \Slim\App($config);
 //Create new Driver
 $app->post('/createdriver', function(Request $request, Response $response){
 
-    if(!haveEmptyParameters(array('driver_id', 'driver_name', 'username', 'password', 'driver_ic_number', 'driver_email'), $request, $response))
+    if(!haveEmptyParameters(array('driver_id', 'driver_name', 'username', 'password', 'driver_ic_number', 'driver_email', 'driver_car_number', 'driver_car_model', 'contact_number'), $request, $response))
     {       
         $request_data = $request->getParsedBody();
 
@@ -27,12 +27,16 @@ $app->post('/createdriver', function(Request $request, Response $response){
         $password = $request_data['password'];
         $ic = $request_data['driver_ic_number'];
         $email = $request_data['driver_email'];
+        $car_model = $request_data['driver_car_model'];
+        $car_number = $request_data['driver_car_number'];
+        $driver_contact = $request_data['contact_number'];
+
 
         $hash_password = password_hash($password, PASSWORD_DEFAULT);
 
         $db = new DbOperations;
 
-        $result = $db->createDriver($id, $name, $username, $hash_password, $ic, $email);
+        $result = $db->createDriver($id, $name, $username, $hash_password, $ic, $email, $car_model, $car_number, $driver_contact);
 
         if($result == USER_CREATED)
         {
@@ -76,7 +80,7 @@ $app->post('/createdriver', function(Request $request, Response $response){
 $app->post('/driverlogin', function(Request $request, Response $response)
 {
 
-    if(!haveEmptyParameters(array('username' , 'password'), $request, $response))
+    if(!haveEmptyParameters(array('username', 'password'), $request, $response))
     {
         $request_data = $request->getParsedBody();
 
@@ -91,7 +95,6 @@ $app->post('/driverlogin', function(Request $request, Response $response)
         {
             $driver = $db->getDriverByUsername($username);
             $response_data = array();
-
             $response_data['error'] = false;
             $response_data['message'] = 'Login Successful';
             $response_data['driver'] = $driver;
@@ -102,32 +105,16 @@ $app->post('/driverlogin', function(Request $request, Response $response)
                         ->withStatus(200);
                         //200='ok'
 
-        }elseif($result == USER_NOT_FOUND)
+        }elseif($result == false)
         {
-
             $response_data = array();
-
-            $response_data['error'] = true;
-            $response_data['message'] = 'User does not exist';
-
-            $response->write(json_encode($response_data));
-            return $response
-                        ->withHeader('Content-type', 'application/json')
-                        ->withStatus(404);
-                        //404='not found'
-   
-
-        }elseif ($result == USER_PASSWORD_DO_NOT_MATCH) {
-
-            $response_data = array();
-
             $response_data['error'] = true;
             $response_data['message'] = 'Invalid Credentials';
 
             $response->write(json_encode($response_data));
             return $response
                         ->withHeader('Content-type', 'application/json')
-                        ->withStatus(404);
+                        ->withStatus(201);
                         //404='not found'
         }
     }
@@ -177,14 +164,14 @@ $app->put('/drivercurrentposition' , function(Request $request , Response $respo
 //returns one driver's last location 
 $app->post('/getdriverlocation', function(Request $request, Response $response)
 {
-    if(!haveEmptyParameters(array('username'), $request, $response))
+    if(!haveEmptyParameters(array('driver_id'), $request, $response))
     {
 
     $request_data = $request->getParsedBody();
-    $username = $request_data['username'];    
+    $driver_id = $request_data['driver_id'];    
 
     $db = new DbOperations;
-    $location = $db->getDriverLocationByUsername($username);
+    $location = $db->getDriverLocationById($driver_id);
 
     if ($location != USER_NOT_FOUND) {
         $response_data = array();
@@ -212,15 +199,488 @@ $app->post('/getdriverlocation', function(Request $request, Response $response)
     }
 });
 
+$app->post('/scanningassignedtrip', function(Request $request, Response $response)
+{
+    if(!haveEmptyParameters(array('driver_id'), $request, $response))
+    {
+
+    $request_data = $request->getParsedBody();
+    $id = $request_data['driver_id'];    
+
+    $db = new DbOperations;
+    $trip = $db->scanningAssignedTrip($id);
+
+    if ($trip == TRIP_FOUND) {
+        $response_data = array();
+        $response_data['error'] = false;
+        $response_data['message'] = "Found a new Trip";
+        $response->write(json_encode($response_data));
+
+        return $response
+                    ->withHeader('Content-type', 'application/json')
+                    ->withStatus(200);
+        
+    }
+    else {
+        $response_data = array();
+        $response_data['error'] = true;
+        $response_data['message'] = 'No Trip Available';
+        $response->write(json_encode($response_data));
+
+        return $response
+                    ->withHeader('Content-type', 'application/json')
+                    ->withStatus(200);
+    }
+    
+
+    }
+});
+
+$app->put('/updatedriverworkingstatus', function(Request $request, Response $response)
+{
+    if(!haveEmptyParameters(array('driver_id', 'working_status'), $request, $response))
+    {
+
+    $request_data = $request->getParsedBody();
+    $id = $request_data['driver_id'];    
+    $w_s = $request_data['working_status'];    
+
+
+    $db = new DbOperations;
+    $working_status = $db->updateDriverWorkingStatus($id , $w_s);
+
+    if ($working_status == true) {
+        $response_data = array();
+        $response_data['error'] = false;
+        $response_data['message'] = "Working Status Changed!";
+        $response->write(json_encode($response_data));
+
+        return $response
+                    ->withHeader('Content-type', 'application/json')
+                    ->withStatus(200);
+        
+    }
+    else {
+        $response_data = array();
+        $response_data['error'] = true;
+        $response_data['message'] = 'There was a problem!';
+        $response->write(json_encode($response_data));
+
+        return $response
+                    ->withHeader('Content-type', 'application/json')
+                    ->withStatus(200);
+    }
+    
+
+    }
+});
+
+$app->put('/updatepickupstatus', function(Request $request, Response $response)
+{
+    if(!haveEmptyParameters(array('driver_id', 'picked_up_status'), $request, $response))
+    {
+
+    $request_data = $request->getParsedBody();
+    $id = $request_data['driver_id'];    
+    $p_u_s = $request_data['picked_up_status'];    
+
+
+    $db = new DbOperations;
+    $pick_up_status = $db->updatePickUpStatus($id, $p_u_s);
+
+    if ($pick_up_status == true) {
+        $response_data = array();
+        $response_data['error'] = false;
+        $response_data['message'] = "Passenger Pick Up Status Changed!";
+        $response->write(json_encode($response_data));
+
+        return $response
+                    ->withHeader('Content-type', 'application/json')
+                    ->withStatus(200);
+        
+    }
+    else {
+        $response_data = array();
+        $response_data['error'] = true;
+        $response_data['message'] = 'There was a problem!';
+        $response->write(json_encode($response_data));
+
+        return $response
+                    ->withHeader('Content-type', 'application/json')
+                    ->withStatus(200);
+    }
+    
+
+    }
+});
+
+$app->put('/updatedropoffstatus', function(Request $request, Response $response)
+{
+    if(!haveEmptyParameters(array('driver_id', 'picked_up_status'), $request, $response))
+    {
+
+    $request_data = $request->getParsedBody();
+    $id = $request_data['driver_id'];    
+    $p_u_s = $request_data['picked_up_status'];    
+
+
+    $db = new DbOperations;
+    $pick_up_status = $db->updateDroppedOffStatus($id, $p_u_s);
+
+    if ($pick_up_status == true) {
+        $response_data = array();
+        $response_data['error'] = false;
+        $response_data['message'] = "Passenger Pick Up Status Changed!";
+        $response->write(json_encode($response_data));
+
+        return $response
+                    ->withHeader('Content-type', 'application/json')
+                    ->withStatus(200);
+        
+    }
+    else {
+        $response_data = array();
+        $response_data['error'] = true;
+        $response_data['message'] = 'There was a problem!';
+        $response->write(json_encode($response_data));
+
+        return $response
+                    ->withHeader('Content-type', 'application/json')
+                    ->withStatus(200);
+    }
+    
+
+    }
+});
+
+$app->put('/updatepaidstatus', function(Request $request, Response $response)
+{
+    if(!haveEmptyParameters(array('driver_id', 'picked_up_status'), $request, $response))
+    {
+
+    $request_data = $request->getParsedBody();
+    $id = $request_data['driver_id'];    
+    $p_u_s = $request_data['picked_up_status'];    
+
+
+    $db = new DbOperations;
+    $pick_up_status = $db->updatePaidStatus($id, $p_u_s);
+
+    if ($pick_up_status == true) {
+        $response_data = array();
+        $response_data['error'] = false;
+        $response_data['message'] = "Passenger Pick Up Status Changed!";
+        $response->write(json_encode($response_data));
+
+        return $response
+                    ->withHeader('Content-type', 'application/json')
+                    ->withStatus(200);
+        
+    }
+    else {
+        $response_data = array();
+        $response_data['error'] = true;
+        $response_data['message'] = 'There was a problem!';
+        $response->write(json_encode($response_data));
+
+        return $response
+                    ->withHeader('Content-type', 'application/json')
+                    ->withStatus(200);
+    }
+    }
+});
+
+$app->post('/getdriverdestinationlocation', function(Request $request, Response $response)
+{
+    if(!haveEmptyParameters(array('driver_id'), $request, $response))
+    {
+
+    $request_data = $request->getParsedBody();
+    $driver_id = $request_data['driver_id'];    
+
+    $db = new DbOperations;
+    $location = $db->getDestination($driver_id);
+
+    if ($location != DESTINATION_NOT_FOUND) {
+        $response_data = array();
+        $response_data['error'] = false;
+        $response_data['location'] = $location;
+        $response->write(json_encode($response_data));
+
+        return $response
+                    ->withHeader('Content-type', 'application/json')
+                    ->withStatus(200);
+        
+    }
+    else {
+        $response_data = array();
+        $response_data['error'] = true;
+        $response_data['location'] = DESTINATION_NOT_FOUND;
+        $response->write(json_encode($response_data));
+
+        return $response
+                    ->withHeader('Content-type', 'application/json')
+                    ->withStatus(200);
+    }
+    
+
+    }
+});
+
+$app->post('/getpassengercurrentlocation', function(Request $request, Response $response)
+{
+    if(!haveEmptyParameters(array('driver_id'), $request, $response))
+    {
+
+    $request_data = $request->getParsedBody();
+    $driver_id = $request_data['driver_id'];    
+
+    $db = new DbOperations;
+    $location = $db->getPassengerCurrentLocation($driver_id);
+
+    if ($location != DESTINATION_NOT_FOUND) {
+        $response_data = array();
+        $response_data['error'] = false;
+        $response_data['location'] = $location;
+        $response->write(json_encode($response_data));
+
+        return $response
+                    ->withHeader('Content-type', 'application/json')
+                    ->withStatus(200);
+        
+    }
+    else {
+        $response_data = array();
+        $response_data['error'] = true;
+        $response_data['location'] = DESTINATION_NOT_FOUND;
+        $response->write(json_encode($response_data));
+
+        return $response
+                    ->withHeader('Content-type', 'application/json')
+                    ->withStatus(200);
+    }
+    
+
+    }
+});
+
+
+$app->post('/current_trip_to_ongoing_trip', function(Request $request, Response $response)
+{
+    if(!haveEmptyParameters(array('driver_id'), $request, $response))
+    {
+
+    $request_data = $request->getParsedBody();
+    $driver_id = $request_data['driver_id'];    
+
+    $db = new DbOperations;
+    $current_to_ongoing = $db->current_trip_to_ongoing_trip($driver_id);
+
+    if ($current_to_ongoing == true) {
+        $response_data = array();
+        $response_data['error'] = false;
+        $response_data['message'] = 'Sucessful';
+        $response->write(json_encode($response_data));
+
+        return $response
+                    ->withHeader('Content-type', 'application/json')
+                    ->withStatus(200);
+        
+    }
+    else {
+        $response_data = array();
+        $response_data['error'] = true;
+        $response_data['message'] = 'Data Already Exists or Invalid Data';
+        $response->write(json_encode($response_data));
+
+        return $response
+                    ->withHeader('Content-type', 'application/json')
+                    ->withStatus(200);
+    }
+    
+
+    }
+});
+
+
+
+
+//deleting user(must have id checking)
+$app->post('/deletecurrenttrip', function(Request $request, Response $response, array $args)
+{
+    if(!haveEmptyParameters(array('driver_id'), $request, $response))
+    {
+        $request_data = $request->getParsedBody();
+        $id = $request_data['driver_id']; 
+
+        $db = new DbOperations;
+
+        $response_data = array();
+
+        if($db->deleteCurrentTrip($id))
+        {
+            $response_data['error'] = false;
+            $response_data['message'] = 'Trip status changed into Ongoing';
+
+        }else {
+            $response_data['error'] = true;
+            $response_data['message'] = 'Some Error Occured, Please try again.';
+
+        }
+
+        $response->write(json_encode($response_data));
+
+        return $response
+                    ->withHeader('Content-type', 'application/json')
+                    ->withStatus(200);
+
+    }
+});
+
+$app->post('/deleteongoingtrip', function(Request $request, Response $response, array $args)
+{
+    if(!haveEmptyParameters(array('passenger_id'), $request, $response))
+    {
+        $request_data = $request->getParsedBody();
+        $id = $request_data['passenger_id']; 
+
+        $db = new DbOperations;
+
+        $response_data = array();
+
+        if($db->deleteOngoingTrip($id))
+        {
+            $response_data['error'] = false;
+            $response_data['message'] = 'Trip status changed into Completed';
+
+        }else {
+            $response_data['error'] = true;
+            $response_data['message'] = 'Some Error Occured, Please try again.';
+
+        }
+
+        $response->write(json_encode($response_data));
+
+        return $response
+                    ->withHeader('Content-type', 'application/json')
+                    ->withStatus(200);
+
+    }
+});
+
+$app->get('/getallonlinedriverid', function(Request $request, Response $response)
+{
+    $request_data = $request->getParsedBody();   
+    $db = new DbOperations;
+    $driver = $db->getAllOnlineDriverId();
+    if ($driver != null) {
+        $response_data = array();
+        $response_data['error'] = false;
+        $response_data['drivers'] = $driver;
+        $response->write(json_encode($response_data));
+
+        return $response
+                    ->withHeader('Content-type', 'application/json')
+                    ->withStatus(200);
+        
+    }
+    else {
+        $response_data = array();
+        $response_data['error'] = true;
+        $response_data['drivers'] = 'Not found';
+        $response->write(json_encode($response_data));
+
+        return $response
+                    ->withHeader('Content-type', 'application/json')
+                    ->withStatus(200);
+    }
+        
+});
+
+$app->post('/getdriverhistory' , function(Request $request, Response $response)
+{
+    
+    if(!haveEmptyParameters(array('driver_id'), $request, $response))
+    {
+        $request_data = $request->getParsedBody();   
+        $driver_id = $request_data['driver_id'];
+
+        $db = new DbOperations;
+        $history = $db->getHistoryForDriver($driver_id);
+
+        if ($history != null) {
+            $response_data = array();
+            $response_data['error'] = false;
+            $response_data['history'] = $history;
+            $response->write(json_encode($response_data));
+
+            return $response
+                        ->withHeader('Content-type', 'application/json')
+                        ->withStatus(200);
+            
+        }
+        else {
+            $response_data = array();
+            $response_data['error'] = true;
+            $response_data['history'] = 'No history Were Found';
+            $response->write(json_encode($response_data));
+
+            return $response
+                        ->withHeader('Content-type', 'application/json')
+                        ->withStatus(200);
+        }
+    
+    }
+    
+});
+
+$app->post('/driverlogout' , function(Request $request, Response $response)
+{
+    
+    if(!haveEmptyParameters(array('username'), $request, $response))
+    {
+        $request_data = $request->getParsedBody();   
+        $username = $request_data['username'];
+
+        $db = new DbOperations;
+        $status = $db->driverLogout($username);
+
+        if ($status == true) {
+            $response_data = array();
+            $response_data['error'] = false;
+            $response_data['message'] = 'Logout Sucessful';
+            $response->write(json_encode($response_data));
+
+            return $response
+                        ->withHeader('Content-type', 'application/json')
+                        ->withStatus(200);
+            
+        }
+        else {
+            $response_data = array();
+            $response_data['error'] = true;
+            $response_data['message'] = 'Logout Failed';
+            $response->write(json_encode($response_data));
+
+            return $response
+                        ->withHeader('Content-type', 'application/json')
+                        ->withStatus(200);
+        }
+    
+    }
+    
+});
+
+
 //-----------------------------------------------------DRIVER---------------------------------------------------------------------------------------------        
 
 
 //-----------------------------------------------------PASSENGER---------------------------------------------------------------------------------------------        
 
-//Create new Driver
+//Create new passenger
 $app->post('/createpassenger', function(Request $request, Response $response){
 
-    if(!haveEmptyParameters(array('passenger_id', 'passenger_name', 'username', 'password', 'passenger_ic_number', 'passenger_email'), $request, $response))
+    if(!haveEmptyParameters(array('passenger_id', 'passenger_name', 'username', 'password', 'passenger_ic_number', 'passenger_email', 'contact_number'), $request, $response))
     {       
         $request_data = $request->getParsedBody();
 
@@ -230,12 +690,13 @@ $app->post('/createpassenger', function(Request $request, Response $response){
         $password = $request_data['password'];
         $ic = $request_data['passenger_ic_number'];
         $email = $request_data['passenger_email'];
+        $contact_number = $request_data['contact_number'];
 
         $hash_password = password_hash($password, PASSWORD_DEFAULT);
 
         $db = new DbOperations;
 
-        $result = $db->createPassenger($id, $name, $username, $hash_password, $ic, $email);
+        $result = $db->createPassenger($id, $name, $username, $hash_password, $ic, $email, $contact_number);
 
         if($result == USER_CREATED)
         {
@@ -305,35 +766,74 @@ $app->post('/passengerlogin', function(Request $request, Response $response)
                         ->withStatus(200);
                         //200='ok'
 
-        }elseif($result == USER_NOT_FOUND)
+        }elseif($result == false)
+        {
+            $response_data = array();
+            $response_data['error'] = true;
+            $response_data['message'] = 'Invalid Credentials';
+            $response->write(json_encode($response_data));
+            return $response
+                        ->withHeader('Content-type', 'application/json')
+                        ->withStatus(201);
+                        //404='not found'
+        }
+    }
+
+});
+
+//creating new trip
+$app->post('/passengernewtrip' , function(Request $request , Response $response)
+{
+
+    if(!haveEmptyParameters(array('trip_id', 'passenger_id', 'driver_id', 'l_s_lat', 'l_s_lng', 'l_e_lat', 'l_e_lng'), $request, $response))
+    {
+        $request_data = $request->getParsedBody();
+
+        $trip_id = $request_data['trip_id'];
+        $passenger_id = $request_data['passenger_id'];
+        $driver_id = $request_data['driver_id'];
+        $l_s_lat = $request_data['l_s_lat'];
+        $l_s_lng = $request_data['l_s_lng'];
+        $l_e_lat = $request_data['l_e_lat'];
+        $l_e_lng = $request_data['l_e_lng'];
+
+        $db = new DbOperations;
+
+        $result = $db->newTrip($trip_id, $passenger_id, $driver_id, $l_s_lat, $l_s_lng, $l_e_lat, $l_e_lng);
+
+        if($result == TRIP_CREATED)
+        {
+            $response_data = array();
+
+            $response_data['error'] = false;
+            $response_data['message'] = 'Trip Created';
+            
+
+            $response->write(json_encode($response_data));
+            return $response
+                        ->withHeader('Content-type', 'application/json')
+                        ->withStatus(200);
+                        //200='ok'
+
+        }elseif($result == TRIP_ERROR)
         {
 
             $response_data = array();
 
             $response_data['error'] = true;
-            $response_data['message'] = 'User does not exist';
+            $response_data['message'] = 'There was an error!';
 
             $response->write(json_encode($response_data));
             return $response
                         ->withHeader('Content-type', 'application/json')
-                        ->withStatus(404);
+                        ->withStatus(201);
                         //404='not found'
    
 
-        }elseif ($result == USER_PASSWORD_DO_NOT_MATCH) {
-
-            $response_data = array();
-
-            $response_data['error'] = true;
-            $response_data['message'] = 'Invalid Credentials';
-
-            $response->write(json_encode($response_data));
-            return $response
-                        ->withHeader('Content-type', 'application/json')
-                        ->withStatus(404);
-                        //404='not found'
         }
+        
     }
+
 
 });
 
@@ -377,6 +877,496 @@ $app->put('/passengercurrentposition' , function(Request $request , Response $re
     }
 });
 
+//passenger logout query
+$app->post('/passengerlogout' , function(Request $request, Response $response)
+{
+    
+    if(!haveEmptyParameters(array('username'), $request, $response))
+    {
+        $request_data = $request->getParsedBody();   
+        $username = $request_data['username'];
+
+        $db = new DbOperations;
+        $status = $db->passengerLogout($username);
+
+        if ($status == true) {
+            $response_data = array();
+            $response_data['error'] = false;
+            $response_data['message'] = 'Logout Sucessful';
+            $response->write(json_encode($response_data));
+
+            return $response
+                        ->withHeader('Content-type', 'application/json')
+                        ->withStatus(200);
+            
+        }
+        else {
+            $response_data = array();
+            $response_data['error'] = true;
+            $response_data['message'] = 'Logout Failed';
+            $response->write(json_encode($response_data));
+
+            return $response
+                        ->withHeader('Content-type', 'application/json')
+                        ->withStatus(200);
+        }
+    
+    }
+    
+});
+
+$app->post('/getpassengerhistory' , function(Request $request, Response $response)
+{
+    
+    if(!haveEmptyParameters(array('passenger_id'), $request, $response))
+    {
+        $request_data = $request->getParsedBody();   
+        $passenger_id = $request_data['passenger_id'];
+
+        $db = new DbOperations;
+        $history = $db->getHistoryForPassenger($passenger_id);
+
+        if ($history != null) {
+            $response_data = array();
+            $response_data['error'] = false;
+            $response_data['history'] = $history;
+            $response->write(json_encode($response_data));
+
+            return $response
+                        ->withHeader('Content-type', 'application/json')
+                        ->withStatus(200);
+            
+        }
+        else {
+            $response_data = array();
+            $response_data['error'] = true;
+            $response_data['history'] = 'No history Were Found';
+            $response->write(json_encode($response_data));
+
+            return $response
+                        ->withHeader('Content-type', 'application/json')
+                        ->withStatus(200);
+        }
+    
+    }
+    
+});
+
+$app->post('/getpassengertripid' , function(Request $request, Response $response)
+{
+    
+    if(!haveEmptyParameters(array('passenger_id'), $request, $response))
+    {
+        $request_data = $request->getParsedBody();   
+        $passenger_id = $request_data['passenger_id'];
+
+        $db = new DbOperations;
+        $trip_id = $db->getCurrentPassengerTripId($passenger_id);
+
+        if ($trip_id != null) {
+            $response_data = array();
+            $response_data['error'] = false;
+            $response_data['message'] = $trip_id;
+            $response->write(json_encode($response_data));
+
+            return $response
+                        ->withHeader('Content-type', 'application/json')
+                        ->withStatus(200);
+            
+        }
+        else {
+            $response_data = array();
+            $response_data['error'] = true;
+            $response_data['message'] = 'No history Were Found';
+            $response->write(json_encode($response_data));
+
+            return $response
+                        ->withHeader('Content-type', 'application/json')
+                        ->withStatus(200);
+        }
+    
+    }
+    
+});
+
+$app->post('/ispassengerexistbyidcu' , function(Request $request, Response $response)
+{
+    
+    if(!haveEmptyParameters(array('passenger_id'), $request, $response))
+    {
+        $request_data = $request->getParsedBody();   
+        $passenger_id = $request_data['passenger_id'];
+
+        $db = new DbOperations;
+        $status = $db->isPassengerExistByIdCu($passenger_id);
+
+        if ($status > 0) {
+            $response_data = array();
+            $response_data['error'] = false;
+            $response_data['message'] = 'Trip Exist in Current Trip';
+            $response->write(json_encode($response_data));
+
+            return $response
+                        ->withHeader('Content-type', 'application/json')
+                        ->withStatus(200);
+            
+        }
+        else {
+            $response_data = array();
+            $response_data['error'] = true;
+            $response_data['message'] = 'Trip Does Not Exist in Current Trip';
+            $response->write(json_encode($response_data));
+
+            return $response
+                        ->withHeader('Content-type', 'application/json')
+                        ->withStatus(200);
+        }
+    
+    }
+    
+});
+
+$app->post('/ispassengerexistbyidon' , function(Request $request, Response $response)
+{
+    
+    if(!haveEmptyParameters(array('passenger_id'), $request, $response))
+    {
+        $request_data = $request->getParsedBody();   
+        $passenger_id = $request_data['passenger_id'];
+
+        $db = new DbOperations;
+        $status = $db->isPassengerExistByIdOn($passenger_id);
+
+        if ($status > 0) {
+            $response_data = array();
+            $response_data['error'] = false;
+            $response_data['message'] = 'Trip Exist in Current Trip';
+            $response->write(json_encode($response_data));
+
+            return $response
+                        ->withHeader('Content-type', 'application/json')
+                        ->withStatus(200);
+            
+        }
+        else {
+            $response_data = array();
+            $response_data['error'] = true;
+            $response_data['message'] = 'Trip Does Not Exist in Current Trip';
+            $response->write(json_encode($response_data));
+
+            return $response
+                        ->withHeader('Content-type', 'application/json')
+                        ->withStatus(200);
+        }
+    
+    }
+    
+});
+
+$app->post('/getpassengerpickedupstatus' , function(Request $request, Response $response)
+{
+    
+    if(!haveEmptyParameters(array('passenger_id'), $request, $response))
+    {
+        $request_data = $request->getParsedBody();   
+        $passenger_id = $request_data['passenger_id'];
+
+        $db = new DbOperations;
+        $status = $db->getPassengerPickedUpStatus($passenger_id);
+
+        if ($status == 'true') {
+            $response_data = array();
+            $response_data['error'] = false;
+            $response_data['message'] = 'Passenger Have Been Picked Up';
+            $response->write(json_encode($response_data));
+
+            return $response
+                        ->withHeader('Content-type', 'application/json')
+                        ->withStatus(200);
+            
+        }
+        else {
+            $response_data = array();
+            $response_data['error'] = true;
+            $response_data['message'] = 'Passenger Have Not Been Picked Up';
+            $response->write(json_encode($response_data));
+
+            return $response
+                        ->withHeader('Content-type', 'application/json')
+                        ->withStatus(200);
+        }
+    
+    }
+    
+});
+
+$app->post('/getpassengerdroppedoffstatus' , function(Request $request, Response $response)
+{
+    
+    if(!haveEmptyParameters(array('passenger_id'), $request, $response))
+    {
+        $request_data = $request->getParsedBody();   
+        $passenger_id = $request_data['passenger_id'];
+
+        $db = new DbOperations;
+        $status = $db->getPassengerDroppedOffStatus($passenger_id);
+
+        if ($status == 'true') {
+            $response_data = array();
+            $response_data['error'] = false;
+            $response_data['message'] = 'Passenger Have Been Dropped';
+            $response->write(json_encode($response_data));
+
+            return $response
+                        ->withHeader('Content-type', 'application/json')
+                        ->withStatus(200);
+            
+        }
+        else {
+            $response_data = array();
+            $response_data['error'] = true;
+            $response_data['message'] = 'Passenger Have Not Been Dropped';
+            $response->write(json_encode($response_data));
+
+            return $response
+                        ->withHeader('Content-type', 'application/json')
+                        ->withStatus(200);
+        }
+    
+    }
+    
+});
+
+$app->post('/getpassengerpaidstatus' , function(Request $request, Response $response)
+{
+    
+    if(!haveEmptyParameters(array('passenger_id'), $request, $response))
+    {
+        $request_data = $request->getParsedBody();   
+        $passenger_id = $request_data['passenger_id'];
+
+        $db = new DbOperations;
+        $status = $db->getPassengerPaidStatus($passenger_id);
+
+        if ($status == 'true') {
+            $response_data = array();
+            $response_data['error'] = false;
+            $response_data['message'] = 'Passenger Have  Paid';
+            $response->write(json_encode($response_data));
+
+            return $response
+                        ->withHeader('Content-type', 'application/json')
+                        ->withStatus(200);
+            
+        }
+        else {
+            $response_data = array();
+            $response_data['error'] = true;
+            $response_data['message'] = 'Passenger Have Not Paid';
+            $response->write(json_encode($response_data));
+
+            return $response
+                        ->withHeader('Content-type', 'application/json')
+                        ->withStatus(200);
+        }
+    
+    }
+    
+});
+
+$app->post('/setpassengerpickedupstatus' , function(Request $request, Response $response)
+{
+    
+    if(!haveEmptyParameters(array('passenger_id','status'), $request, $response))
+    {
+        $request_data = $request->getParsedBody();   
+        $passenger_id = $request_data['passenger_id'];
+        $p_u_s = $request_data['status'];
+
+
+        $db = new DbOperations;
+        $picked_up_status = $db->updatePickUpStatusByPassenger($passenger_id , $p_u_s);
+
+        if ($picked_up_status == 'true') {
+            $response_data = array();
+            $response_data['error'] = false;
+            $response_data['message'] = 'Status Changed';
+            $response->write(json_encode($response_data));
+
+            return $response
+                        ->withHeader('Content-type', 'application/json')
+                        ->withStatus(200);
+            
+        }
+        else {
+            $response_data = array();
+            $response_data['error'] = true;
+            $response_data['message'] = 'Status Not Changed';
+            $response->write(json_encode($response_data));
+
+            return $response
+                        ->withHeader('Content-type', 'application/json')
+                        ->withStatus(200);
+        }
+    
+    }
+    
+});
+
+$app->post('/setpassengerdroppedoffstatus' , function(Request $request, Response $response)
+{
+    
+    if(!haveEmptyParameters(array('passenger_id','status'), $request, $response))
+    {
+        $request_data = $request->getParsedBody();   
+        $passenger_id = $request_data['passenger_id'];
+        $p_u_s = $request_data['status'];
+
+
+        $db = new DbOperations;
+        $picked_up_status = $db->updateDroppedOffStatusByPassenger($passenger_id , $p_u_s);
+
+        if ($picked_up_status == 'true') {
+            $response_data = array();
+            $response_data['error'] = false;
+            $response_data['message'] = 'Status Changed';
+            $response->write(json_encode($response_data));
+
+            return $response
+                        ->withHeader('Content-type', 'application/json')
+                        ->withStatus(200);
+            
+        }
+        else {
+            $response_data = array();
+            $response_data['error'] = true;
+            $response_data['message'] = 'Status Not Changed';
+            $response->write(json_encode($response_data));
+
+            return $response
+                        ->withHeader('Content-type', 'application/json')
+                        ->withStatus(200);
+        }
+    
+    }
+    
+});
+
+$app->post('/setpassengerpaidstatus' , function(Request $request, Response $response)
+{
+    
+    if(!haveEmptyParameters(array('passenger_id','status'), $request, $response))
+    {
+        $request_data = $request->getParsedBody();   
+        $passenger_id = $request_data['passenger_id'];
+        $p_u_s = $request_data['status'];
+
+
+        $db = new DbOperations;
+        $picked_up_status = $db->updatePaidStatusByPassenger($passenger_id , $p_u_s);
+
+        if ($picked_up_status == 'true') {
+            $response_data = array();
+            $response_data['error'] = false;
+            $response_data['message'] = 'Status Changed';
+            $response->write(json_encode($response_data));
+
+            return $response
+                        ->withHeader('Content-type', 'application/json')
+                        ->withStatus(200);
+            
+        }
+        else {
+            $response_data = array();
+            $response_data['error'] = true;
+            $response_data['message'] = 'Status Not Changed';
+            $response->write(json_encode($response_data));
+
+            return $response
+                        ->withHeader('Content-type', 'application/json')
+                        ->withStatus(200);
+        }
+    
+    }
+    
+});
+
+$app->post('/setfarerating' , function(Request $request, Response $response)
+{
+    
+    if(!haveEmptyParameters(array('trip_id', 'rate', 'rating' ), $request, $response))
+    {
+        $request_data = $request->getParsedBody();   
+        $trip_id = $request_data['trip_id'];
+        $rate = $request_data['rate'];
+        $rating = $request_data['rating'];
+
+
+        $db = new DbOperations;
+        $picked_up_status = $db->updateFareRatingByPassenger($trip_id , $rate, $rating);
+
+        if ($picked_up_status == 'true') {
+            $response_data = array();
+            $response_data['error'] = false;
+            $response_data['message'] = 'Status Changed';
+            $response->write(json_encode($response_data));
+
+            return $response
+                        ->withHeader('Content-type', 'application/json')
+                        ->withStatus(200);
+            
+        }
+        else {
+            $response_data = array();
+            $response_data['error'] = true;
+            $response_data['message'] = 'Status Not Changed';
+            $response->write(json_encode($response_data));
+
+            return $response
+                        ->withHeader('Content-type', 'application/json')
+                        ->withStatus(200);
+        }
+    
+    }
+    
+});
+
+$app->post('/ongoing_trip_to_completed_trip', function(Request $request, Response $response)
+{
+    if(!haveEmptyParameters(array('driver_id'), $request, $response))
+    {
+
+    $request_data = $request->getParsedBody();
+    $driver_id = $request_data['driver_id'];    
+
+    $db = new DbOperations;
+    $ongoing_to_completed = $db->ongoing_trip_to_completed_trip($driver_id);
+
+    if ($ongoing_to_completed == true) {
+        $response_data = array();
+        $response_data['error'] = false;
+        $response_data['message'] = 'Sucessful';
+        $response->write(json_encode($response_data));
+
+        return $response
+                    ->withHeader('Content-type', 'application/json')
+                    ->withStatus(200);
+        
+    }
+    else {
+        $response_data = array();
+        $response_data['error'] = true;
+        $response_data['message'] = 'Data Already Exists or Invalid Data';
+        $response->write(json_encode($response_data));
+
+        return $response
+                    ->withHeader('Content-type', 'application/json')
+                    ->withStatus(200);
+    }
+    
+
+    }
+});
 //-----------------------------------------------------PASSENGER---------------------------------------------------------------------------------------------        
 
 //-----------------------------------------------------AUTHENTICATION---------------------------------------------------------------------------------------------        
@@ -687,5 +1677,4 @@ $app->delete('/deleteuser/{id}', function(Request $request, Response $response, 
 $app->run();
 
 //change the tracking to driver
-//pass the value of searched location
 //pass value of current location into my sql for and passenger

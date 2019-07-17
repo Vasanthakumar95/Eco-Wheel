@@ -12,6 +12,8 @@ import com.example.eco_rest_retro_mysql.Models.DriverLoginResponse;
 import com.example.eco_rest_retro_mysql.Models.PassengerLoginResponse;
 import com.example.eco_rest_retro_mysql.R;
 
+import org.jetbrains.annotations.NotNull;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -20,6 +22,7 @@ public class PassengerLoginActivity extends AppCompatActivity implements View.On
 
     private EditText editTextUsername, editTextPassword;
     public static String currentUser;
+    public static int currentUserId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,19 +58,20 @@ public class PassengerLoginActivity extends AppCompatActivity implements View.On
         Call<PassengerLoginResponse> call = RetrofitClient.getmInstance().getApi().passengerLogin(username,password);
 
         call.enqueue(new Callback<PassengerLoginResponse>() {
+            @NotNull
             @Override
-            public void onResponse(Call<PassengerLoginResponse> call, Response<PassengerLoginResponse> response) {
-                PassengerLoginResponse passengerLoginResponse = response.body();
+            public void onResponse(Call<PassengerLoginResponse> call,  Response<PassengerLoginResponse> response) {
 
-                if(!passengerLoginResponse.isError())
+                if(!response.body().isError())
                 {
-                    currentUser = passengerLoginResponse.getPassenger().getUsername();
-                    Toast.makeText(PassengerLoginActivity.this, passengerLoginResponse.getMessage(), Toast.LENGTH_LONG).show();
+                    currentUser = response.body().getPassenger().getUsername();
+                    currentUserId = response.body().getPassenger().getPassenger_id();
+                    Toast.makeText(PassengerLoginActivity.this, response.body().getMessage() + " Welcome: " + currentUser, Toast.LENGTH_LONG).show();
                     startActivity(new Intent( PassengerLoginActivity.this , PassengerMapsActivity.class ));
                 }else
-                {
-                    Toast.makeText(PassengerLoginActivity.this, passengerLoginResponse.getMessage(), Toast.LENGTH_LONG).show();
-                }
+                    {
+                        Toast.makeText(PassengerLoginActivity.this, response.body().getMessage(), Toast.LENGTH_LONG).show();
+                    }
             }
 
             @Override
@@ -88,7 +92,6 @@ public class PassengerLoginActivity extends AppCompatActivity implements View.On
             case R.id.textViewRegister:
                 startActivity(new Intent(this , PassengerRegisterActivity.class));
                 break;
-
         }
 
     }
@@ -96,6 +99,11 @@ public class PassengerLoginActivity extends AppCompatActivity implements View.On
     public static String getCurrentPassengerUsername()
     {
         return currentUser;
+    }
+
+    public static int getCurrentPassengerId()
+    {
+        return currentUserId;
     }
 
 }

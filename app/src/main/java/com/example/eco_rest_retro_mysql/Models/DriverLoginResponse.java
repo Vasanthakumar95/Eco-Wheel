@@ -2,7 +2,7 @@ package com.example.eco_rest_retro_mysql.Models;
 
 public class DriverLoginResponse {
 
-    private boolean error;
+    private boolean error = true;
     private String message;
     private Driver driver;
 
@@ -12,9 +12,7 @@ public class DriverLoginResponse {
         this.driver = driver;
     }
 
-    public boolean isError() {
-        return error;
-    }
+    public boolean isError() { return error; }
 
     public String getMessage() {
         return message;

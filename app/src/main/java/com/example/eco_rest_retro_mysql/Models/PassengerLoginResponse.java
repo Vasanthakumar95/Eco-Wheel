@@ -2,7 +2,7 @@ package com.example.eco_rest_retro_mysql.Models;
 
 public class PassengerLoginResponse {
 
-    private boolean error;
+    private boolean error = true;
     private String message;
     private Passenger passenger;
 

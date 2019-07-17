@@ -5,4 +5,5 @@
     <color name="colorPrimaryBackground">#0886c7</color>
     <color name="colorAccent">#375290</color>
     <color name="colorFormBackground">#e4e4e4</color>
+    <color name="colorBrightGreen">#66FF66</color>
 </resources>

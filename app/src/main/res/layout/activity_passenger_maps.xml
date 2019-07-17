@@ -8,12 +8,204 @@
     android:layout_height="match_parent"
     tools:context=".Activity.PassengerMapsActivity">
 
-    <Button
+
+    <android.support.v7.widget.CardView
+    android:id="@+id/idCardView"
+    android:layout_gravity="end|top"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="5dp"
+    android:layout_marginTop="5dp">
+
+
+        <fragment
+            android:id="@+id/autocomplete_fragment"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:name="com.google.android.libraries.places.widget.AutocompleteSupportFragment"
+            />
+
+    </android.support.v7.widget.CardView>
+
+
+    <TextView android:id="@+id/txtView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="left|top"
-        android:text="Logout"
-        android:padding="20dp"
-        android:paddingRight="10dp"/>
+        android:text="Hello World!"
+        />
+
+    <LinearLayout
+        android:id="@+id/alldetails"
+        android:orientation="vertical"
+        android:layout_gravity="end|bottom"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+
+        >
+
+
+        <android.support.v7.widget.CardView
+            android:id="@+id/idCardViewDetailsDriver"
+            android:layout_gravity="end|top"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="invisible"
+            >
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/txtDetailsDriver"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Driver :       "
+                        android:textStyle="bold"
+                        />
+
+                    <TextView android:id="@+id/txtDetailsDriver2"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textAlignment="center"
+                        android:text=""
+                        />
+
+                </LinearLayout>
+
+        </android.support.v7.widget.CardView>
+
+        <android.support.v7.widget.CardView
+            android:id="@+id/idCardViewDetailsLocationName"
+            android:layout_gravity="end|top"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            >
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/txtDetailsLocationName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Destination :"
+                    android:textStyle="bold"
+                    />
+
+                <TextView android:id="@+id/txtDetailsLocationName2"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textAlignment="center"
+                    android:text=""
+                    />
+
+            </LinearLayout>
+
+        </android.support.v7.widget.CardView>
+
+        <android.support.v7.widget.CardView
+            android:id="@+id/idCardViewDetailsDistance"
+            android:layout_gravity="end|top"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            >
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/txtDetailsDistance"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Distance :    "
+                    android:textStyle="bold"
+                    />
+
+                <TextView android:id="@+id/txtDetailsDistance2"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textAlignment="center"
+                    android:text=""
+                    />
+
+            </LinearLayout>
+
+        </android.support.v7.widget.CardView>
+
+        <android.support.v7.widget.CardView
+            android:id="@+id/idCardViewDetailsFare"
+            android:layout_gravity="end|top"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            >
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/txtDetailsFare"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Fare :         "
+                    android:textStyle="bold"
+                    />
+
+                <TextView android:id="@+id/txtDetailsFare2"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textAlignment="center"
+                    android:text=""
+                    />
+
+            </LinearLayout>
+
+
+        </android.support.v7.widget.CardView>
+
+            <RelativeLayout
+                android:id="@+id/info"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                >
+                <Button
+                    android:id="@+id/nav_request_ride"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:layout_margin="5dp"
+                    android:text = "Request"
+                    />
+
+                <Button
+                    android:id="@+id/logout_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_toRightOf="@id/nav_request_ride"
+                    android:layout_toEndOf="@id/nav_request_ride"
+                    android:layout_margin="5dp"
+                    android:text="Logout"
+                    />
+
+                <Button
+                    android:id="@+id/history_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_toLeftOf="@id/nav_request_ride"
+                    android:layout_toStartOf="@id/nav_request_ride"
+                    android:layout_margin="5dp"
+                    android:text="History"
+                    />
+            </RelativeLayout>
+
+    </LinearLayout>
 
 </fragment>

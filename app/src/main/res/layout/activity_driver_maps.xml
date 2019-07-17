@@ -6,4 +6,53 @@
     android:name="com.google.android.gms.maps.SupportMapFragment"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".Activity.DriverMapsActivity" />
+    tools:context=".Activity.DriverMapsActivity">
+
+    <Switch
+    android:id="@+id/nav_working_switch"
+    android:theme="@style/AppTheme"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_margin = "5dp"
+    android:text="Working"
+    android:checked="false"
+    android:textOff="Off"
+    android:textOn="On"
+    android:layout_gravity="end|top"/>
+
+
+
+    <Button
+        android:id="@+id/nav_accept_trip"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center|bottom"
+        android:layout_margin="5dp"
+        android:text="PICKED UP"
+        android:visibility="invisible"
+        />
+
+    <Button
+        android:id="@+id/nav_dropped_off"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center|bottom"
+        android:layout_margin="5dp"
+        android:text="DROPPED OFF"
+        android:visibility="invisible"
+        />
+
+    <Button
+        android:id="@+id/nav_paid"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center|bottom"
+        android:layout_margin="5dp"
+        android:text="PAID"
+        android:visibility="invisible"
+        />
+
+
+
+</fragment>
+

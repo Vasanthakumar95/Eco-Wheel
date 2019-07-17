@@ -13,6 +13,8 @@ import com.example.eco_rest_retro_mysql.Api.RetrofitClient;
 import com.example.eco_rest_retro_mysql.Models.DriverLoginResponse;
 import com.example.eco_rest_retro_mysql.R;
 
+import org.jetbrains.annotations.NotNull;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -21,7 +23,7 @@ public class DriverLoginActivity extends AppCompatActivity implements View.OnCli
 
     private EditText editTextUsername, editTextPassword;
     public static String currentUser;
-
+    public static int currentUserId;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -58,18 +60,19 @@ public class DriverLoginActivity extends AppCompatActivity implements View.OnCli
         Call<DriverLoginResponse> call = RetrofitClient.getmInstance().getApi().driverLogin(username,password);
 
         call.enqueue(new Callback<DriverLoginResponse>() {
+            @NotNull
             @Override
-            public void onResponse(Call<DriverLoginResponse> call, Response<DriverLoginResponse> response) {
-                DriverLoginResponse driverLoginResponse = response.body();
+            public void onResponse(Call<DriverLoginResponse> call,  Response<DriverLoginResponse> response) {
 
-                if(!driverLoginResponse.isError())
+                if(!response.body().isError())
                 {
-                    currentUser = driverLoginResponse.getDriver().getUsername();
-                    Toast.makeText(DriverLoginActivity.this, driverLoginResponse.getMessage(), Toast.LENGTH_LONG).show();
+                    currentUser = response.body().getDriver().getUsername();
+                    currentUserId = response.body().getDriver().getDriver_id();
+                    Toast.makeText(DriverLoginActivity.this, response.body().getMessage() + " Welcome: " + currentUser, Toast.LENGTH_LONG).show();
                     startActivity(new Intent( DriverLoginActivity.this , DriverMapsActivity.class ));
                 }else
                     {
-                        Toast.makeText(DriverLoginActivity.this, driverLoginResponse.getMessage(), Toast.LENGTH_LONG).show();
+                        Toast.makeText(DriverLoginActivity.this, response.body().getMessage(), Toast.LENGTH_LONG).show();
                     }
             }
 
@@ -98,6 +101,11 @@ public class DriverLoginActivity extends AppCompatActivity implements View.OnCli
     public static String getCurrentDriverUsername()
     {
         return currentUser;
+    }
+
+    public static int getCurrentDriverId()
+    {
+        return currentUserId;
     }
 
 

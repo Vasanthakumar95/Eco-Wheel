@@ -32,7 +32,6 @@
             android:id="@+id/editTextUsername"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-
             android:drawablePadding="5dp"
             android:hint="USERNAME"
             android:inputType="text" />
@@ -41,7 +40,6 @@
             android:id="@+id/editTextPassword"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-
             android:drawablePadding="5dp"
             android:hint="PASSWORD"
             android:inputType="textPassword" />
@@ -50,7 +48,6 @@
             android:id="@+id/editTextName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-
             android:drawablePadding="5dp"
             android:hint="NAME"
             android:inputType="textPersonName" />
@@ -59,7 +56,6 @@
             android:id="@+id/editTextIc"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-
             android:drawablePadding="5dp"
             android:hint="IC NO."
             android:inputType="text" />
@@ -68,10 +64,17 @@
             android:id="@+id/editTextEmail"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-
             android:drawablePadding="5dp"
             android:hint="EMAIL"
             android:inputType="textEmailAddress" />
+
+        <EditText
+            android:id="@+id/editTextContact"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:drawablePadding="5dp"
+            android:hint="CONTACT NO."
+            android:inputType="text" />
 
 
     </LinearLayout>

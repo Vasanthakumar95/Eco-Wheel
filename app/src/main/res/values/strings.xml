@@ -1,8 +1,43 @@
 <resources>
-    <string name="app_name">eco_rest_retro_mysql</string>
+    <string name="app_name">ECOWHEEL</string>
     <string name="title_activity_driver_maps">Map</string>
     <string name="location_permission_denied">0</string>
     <string name="permission_required_toast">1</string>
     <string name="permission_rationale_location" />
     <string name="title_activity_passenger_maps">Map</string>
+    <string name="title_activity_navi__main">Navi_Main</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="nav_header_title">Android Studio</string>
+    <string name="nav_header_subtitle">android.studio@android.com</string>
+    <string name="nav_header_desc">Navigation header</string>
+    <string name="action_settings">Settings</string>
+    <string name="title_activity_bottom__nav">Bottom_Nav</string>
+    <string name="title_home">Home</string>
+    <string name="title_dashboard">Dashboard</string>
+    <string name="title_notifications">Notifications</string>
+
+    <string-array name="cars_array">
+        <item>Select A Car Model</item>
+        <item>BMW-i3</item>
+        <item>Chery	QQ3 EV</item>
+        <item>Chevrolet	Bolt EV</item>
+        <item>Citroën C-Zero</item>
+        <item>Fiat 500e</item>
+        <item>Ford Focus Electric</item>
+        <item>Honda	Fit EV</item>
+        <item>Hyundai Ioniq Electric</item>
+        <item>Kia Soul EV</item>
+        <item>Kia e-Niro</item>
+        <item>Mercedes-Benz	B-Class Electric Drive</item>
+        <item>Mitsubishi i-MiEV</item>
+        <item>Nissan Leaf</item>
+        <item>Peugeot i0n</item>
+        <item>Renault Zoe</item>
+        <item>Tesla	Model S</item>
+        <item>Tesla	Model X</item>
+        <item>Tesla	Model 3</item>
+        <item>Volkswagen e-Golf</item>
+        <item>Volkswagen e-Up</item>
+    </string-array>
 </resources>
