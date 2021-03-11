@@ -5,8 +5,8 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class RetrofitClient {
 
-                                            //13.58.111.54(aws)192.168.43.201
-    private static final String BASE_URL = "http://192.168.43.201/ECOWHEEL/public/";
+                                            // example = 13.58.111.54
+    private static final String BASE_URL = "http://example/ECOWHEEL/public/";
     private static RetrofitClient mInstance;
     private Retrofit retrofit;
 
